@@ -13,6 +13,7 @@ See our template dataset class 'template_dataset.py' for more details.
 import importlib
 import torch.utils.data
 from data.base_dataset import BaseDataset
+from torch.utils.data.sampler import RandomSampler
 
 
 def find_dataset_using_name(dataset_name):
@@ -74,8 +75,8 @@ class CustomDatasetDataLoader():
         print("dataset [%s] was created" % type(self.dataset).__name__)
         self.dataloader = torch.utils.data.DataLoader(
             self.dataset,
+            sampler=RandomSampler(self.dataset, replacement=True, num_samples=opt.n_samples),
             batch_size=opt.batch_size,
-            shuffle=not opt.serial_batches,
             num_workers=int(opt.num_threads))
 
     def load_data(self):
