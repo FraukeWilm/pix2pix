@@ -357,10 +357,15 @@ class ResnetGenerator(nn.Module):
 
         for i in range(n_downsampling):  # add upsampling layers
             mult = 2 ** (n_downsampling - i)
-            model += [nn.ConvTranspose2d(ngf * mult, int(ngf * mult / 2),
-                                         kernel_size=3, stride=2,
-                                         padding=1, output_padding=1,
-                                         bias=use_bias),
+            # Replace deconvolution by nearest-neighbor upsampling followed by regular convolution to remove
+            # checkerboard artifacts
+            model += [nn.Upsample(scale_factor = 2, mode='bilinear'),
+                      nn.ReflectionPad2d(1),
+                      nn.Conv2d(ngf * mult, int(ngf * mult / 2), kernel_size=3, stride=1, padding=0),
+                      #nn.ConvTranspose2d(ngf * mult, int(ngf * mult / 2),
+                      #                   kernel_size=3, stride=2,
+                      #                   padding=1, output_padding=1,
+                      #                   bias=use_bias),
                       norm_layer(int(ngf * mult / 2)),
                       nn.ReLU(True)]
         model += [nn.ReflectionPad2d(3)]
