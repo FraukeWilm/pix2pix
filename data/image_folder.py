@@ -24,14 +24,14 @@ def is_image_file(filename):
     return any(filename.endswith(extension) for extension in IMG_EXTENSIONS)
 
 
-def make_dataset(dir, max_dataset_size=float("inf")):
+def make_dataset(dir, isTrain=True, max_dataset_size=float("inf")):
     images = []
     assert os.path.isdir(dir), '%s is not a valid directory' % dir
     slides = pd.read_csv('data/scc_dataset.csv', delimiter=";")
 
     for root, _, fnames in sorted(os.walk(dir)):
         for fname in fnames:
-            if slides.loc[slides.Slide == fname[:6]].Dataset.values.__contains__('train'):
+            if not isTrain or slides.loc[slides.Slide == fname[:6]].Dataset.values.__contains__('train'):
                 path = os.path.join(root, fname)
                 images.append(path)
     return images[:min(max_dataset_size, len(images))]
